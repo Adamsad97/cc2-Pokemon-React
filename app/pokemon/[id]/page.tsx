@@ -4,6 +4,7 @@ import Badge from '@/components/ui/Badge'
 import PokemonStats from '@/components/pokemon/PokemonStats'
 import PokemonEvolutions from '@/components/pokemon/PokemonEvolutions'
 import { getPokemonById } from '@/lib/api/pokemon'
+import { PokemonType } from '@/types/pokemon'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -13,8 +14,6 @@ export default async function PokemonDetailPage({ params }: PageProps) {
   const { id } = await params
   const pokemon = await getPokemonById(Number(id))
 
-  console.log('POKEMON DATA:', JSON.stringify(pokemon, null, 2))
-
   return (
     <main className="max-w-2xl mx-auto p-6">
       <BackButton />
@@ -22,10 +21,17 @@ export default async function PokemonDetailPage({ params }: PageProps) {
         <span className="text-gray-400 font-semibold">
           #{String(pokemon.pokedexId).padStart(3, '0')}
         </span>
-        <Image src={pokemon.image} alt={pokemon.name} width={200} height={200} className="object-contain" />
+        <Image
+          src={pokemon.image}
+          alt={pokemon.name}
+          width={200}
+          height={200}
+          className="object-contain"
+          loading="eager"
+        />
         <h1 className="text-3xl font-bold capitalize">{pokemon.name}</h1>
         <div className="flex gap-2">
-          {pokemon.types.map((type) => (
+          {pokemon.types.map((type: PokemonType) => (
             <Badge key={type.id} name={type.name} />
           ))}
         </div>

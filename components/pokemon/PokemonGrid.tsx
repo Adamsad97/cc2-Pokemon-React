@@ -23,6 +23,7 @@ export default function PokemonGrid({ types }: PokemonGridProps) {
   const [done, setDone] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
   const loadingRef = useRef(false)
+  const initialFetchDone = useRef(false)
 
   const fetchPokemons = async (
     currentPage: number,
@@ -42,7 +43,13 @@ export default function PokemonGrid({ types }: PokemonGridProps) {
       if (!data.length) {
         setDone(true)
       } else {
-        setPokemons((prev) => reset ? data : [...prev, ...data])
+        setPokemons((prev) => {
+          const newList = reset ? data : [...prev, ...data]
+          const unique = Array.from(
+            new Map(newList.map((p) => [p.pokedexId, p])).values()
+          )
+          return unique
+        })
         setPage(currentPage + 1)
       }
     } catch (error) {
@@ -54,6 +61,8 @@ export default function PokemonGrid({ types }: PokemonGridProps) {
   }
 
   useEffect(() => {
+    if (initialFetchDone.current) return
+    initialFetchDone.current = true
     fetchPokemons(1, 50, '', [])
   }, [])
 
@@ -63,7 +72,7 @@ export default function PokemonGrid({ types }: PokemonGridProps) {
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting && !done) {
+        if (entry.isIntersecting && !done && initialFetchDone.current) {
           fetchPokemons(page, limit, name, selectedTypes)
         }
       })
@@ -106,7 +115,11 @@ export default function PokemonGrid({ types }: PokemonGridProps) {
         <LimitSelector limit={limit} onLimitChange={handleLimitChange} />
       </div>
 
-      <TypeFilter types={types} selectedTypes={selectedTypes} onTypeToggle={handleTypeToggle} />
+      <TypeFilter
+        types={types}
+        selectedTypes={selectedTypes}
+        onTypeToggle={handleTypeToggle}
+      />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
         {pokemons.map((pokemon) => (

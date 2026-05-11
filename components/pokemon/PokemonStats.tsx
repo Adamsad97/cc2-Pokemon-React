@@ -7,7 +7,15 @@ interface PokemonStatsProps {
 function normalizeStats(stats: PokemonStat[] | Record<string, number>): PokemonStat[] {
   if (Array.isArray(stats)) return stats
 
-  return Object.entries(stats).map(([name, value]) => ({ name, value }))
+  const seen = new Set<string>()
+  return Object.entries(stats)
+    .filter(([name]) => {
+      const normalized = name.toLowerCase().replace('_', '')
+      if (seen.has(normalized)) return false
+      seen.add(normalized)
+      return true
+    })
+    .map(([name, value]: [string, number]) => ({ name, value }))
 }
 
 export default function PokemonStats({ stats }: PokemonStatsProps) {
