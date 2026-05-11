@@ -1,0 +1,1 @@
+export const API_URL = 'https://nestjs-pokedex-api.vercel.app'
